@@ -1,0 +1,109 @@
+{
+  "train": {
+    "batch_size": 32,
+    "learning_rate_g":1e-4,
+    "learning_rate_d":2e-4,
+    "beta1":0.9,
+    "beta2":0.999,
+    "mss_wins": [2048, 512, 128],
+    "mss_hops": [512, 128, 32],
+    "cqt_shift_min":-12,
+    "cqt_shift_max":12,
+    "kappa":0.1,
+    "cntr_adj":10,
+    "cntr_candidates":15,
+    "cntr_weight_start":1e-5,
+    "cntr_weight_end":10,
+    "log_interval": 10,
+    "save_model_interval": 5,
+    "sample_interval": 5,
+    "seed": 1234,
+    "total_epochs": 20000
+  },
+  "data": {
+    "datasets":["vctk"],
+    "noise_dir":"/disk2/DEMAND/modified/DEMANDTestForCustomSet(DEMAND_train)_16k",
+    "sample_rate":16000,
+    "seg_sec":4,
+    "perturb_formant":1,
+    "perturb_pitch":1,
+    "perturb_breathiness":1,
+    "perturb_peq":1,
+    "perturb_noise":1
+  },
+  "features": {
+    "mel": {
+      "bin" : 80,
+      "hop": 256,
+      "win": 1024,
+      "win_fn": "hann",
+      "fmin": 0,
+      "fmax": 8000
+      },
+    "cqt": {
+      "hop_length":320,
+      "fmin":32.7,
+      "n_bins":191,
+      "bins_per_octave":24
+      }
+  },
+  "model": {
+    "leak":0.01,
+    "dropout":0.1,
+    "linguistic": {
+      "in_channels":1024,
+      "hiddens":128,
+      "preconv":2,
+      "kernels":[3,3,3,3,3,3,3,3,1,1]
+      },
+    "pitch": {
+      "bins":160,
+      "prekernels":7,
+      "kernels":3,
+      "channels":128,
+      "blocks":2,
+      "gru":256,
+      "hiddens":256,
+      "f0_bins":64,
+      "start":50,
+      "end":1000
+      },
+    "timbre": {
+      "global_":192,
+      "channels":512,
+      "prekernels":5,
+      "scale":8,
+      "kernels":3,
+      "dilations":[2,3,4],
+      "bottleneck":128,
+      "hiddens":1536,
+      "latent":512,
+      "timbre":128,
+      "tokens":50,
+      "heads":8,
+      "slerp":0.5
+      },
+    "synthesizer": {
+      "f_kernels":3,
+      "f_dilations":[1, 3, 9, 27, 1, 3, 9, 27],
+      "f_blocks":2,
+      "s_channels":64,
+      "s_kernels":3,
+      "s_dilation_rate":2,
+      "s_layers":10,
+      "s_cycles":3,
+      "sample_rate":16000
+      },
+    "discriminator": {
+      "periods":[2,3,5,7,11],
+      "channels":[32, 128, 512, 1024],
+      "kernels":5,
+      "strides":3,
+      "postkernels":3,
+      "leak":0.1
+      }
+    },
+  "pretrain": {
+    "wav2vec2_cache":"/disk1/pretrained/Wav2Vec2"
+  }
+}
