@@ -12,6 +12,11 @@ import matplotlib.pyplot as plt
 
 phoneme_inventory = ['aa','ae','ah','ao','aw','ax','axr','ay','b','ch','d','dh','dx','eh','el','em','en','er','ey','f','g','hh','hv','ih','iy','jh','k','l','m','n','nx','ng','ow','oy','p','r','s','sh','t','th','uh','uw','v','w','y','z','zh','sil']
 
+def load_text(path):
+    with open(path, encoding='utf-8') as f:
+        text = [line.strip() for line in f]
+    return text
+    
 def normalize_volume(audio):
     rms = librosa.feature.rms(audio)
     max_rms = rms.max() + 0.01

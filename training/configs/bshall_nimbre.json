@@ -1,0 +1,67 @@
+{
+  "train": {
+    "batch_size": 64,
+    "learning_rate_g":1e-4,
+    "learning_rate_d":2e-4,
+    "beta1":0.9,
+    "beta2":0.999,
+    "discriminator":0,
+    "log_interval": 10,
+    "save_model_interval": 5,
+    "sample_interval": 5,
+    "seed": 1234,
+    "total_epochs": 20000
+  },
+  "data": {
+    "datasets":["vctk"],
+    "sample_rate":16000,
+    "seg_sec":4
+  },
+  "features": {
+    "mel": {
+      "bin" : 80,
+      "hop": 160,
+      "win": 1024,
+      "win_fn": "hann",
+      "fmin": 0,
+      "fmax": 8000
+      }
+  },
+  "model": {
+    "generator":"bshall",
+    "leak":0.01,
+    "dropout":0.1,
+    "linguistic": {
+      "hiddens":256
+    },
+    "timbre": {
+      "type":"nansy",
+      "global_":192,
+      "channels":512,
+      "prekernels":5,
+      "scale":8,
+      "kernels":3,
+      "dilations":[2,3,4],
+      "bottleneck":128,
+      "hiddens":1536,
+      "latent":512,
+      "timbre":128,
+      "tokens":50,
+      "heads":8,
+      "slerp":0.5
+      },
+    "synthesizer": {
+      "prenet_indim":256,
+      "decoder_dim":1024,
+      "sample_rate":16000
+      },
+    "discriminator": {
+      "periods":[2,3,5,7,11],
+      "channels":[32, 128, 512, 1024],
+      "kernels":5,
+      "strides":3,
+      "postkernels":3,
+      "leak":0.1
+      }
+    }
+}

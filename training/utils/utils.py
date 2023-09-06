@@ -70,7 +70,8 @@ def load_checkpoint(checkpoint_path, model, optimizer=None):
   assert os.path.isfile(checkpoint_path)
   checkpoint_dict = torch.load(checkpoint_path, map_location='cpu')
   iteration = checkpoint_dict['iteration']
-  learning_rate = checkpoint_dict['learning_rate']
+  # learning_rate = checkpoint_dict['learning_rate']
+  learning_rate = checkpoint_dict['cntr_weight'] if 'cntr_weight' in checkpoint_dict.keys() else checkpoint_dict['learning_rate']
   if optimizer is not None:
     optimizer.load_state_dict(checkpoint_dict['optimizer'])
   saved_state_dict = checkpoint_dict['model']
@@ -86,12 +87,12 @@ def load_checkpoint(checkpoint_path, model, optimizer=None):
       print("Model {}, {} is not in the checkpoint".format(model, k))
       new_state_dict[k] = v
   if hasattr(model, 'module'):
-    model.module.load_state_dict(new_state_dict)
+    model.module.load_state_dict(new_state_dict, strict=False)
   else:
-    model.load_state_dict(new_state_dict)
+    model.load_state_dict(new_state_dict, strict=False)
   print("Loaded checkpoint '{}' (Epoch {})" .format(checkpoint_path, iteration))
   return model, optimizer, learning_rate, iteration
-
+  
 def save_checkpoint(model, optimizer, learning_rate, iteration, checkpoint_path):
   if hasattr(model, 'module'):
     state_dict = model.module.state_dict()

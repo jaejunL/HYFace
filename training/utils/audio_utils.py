@@ -44,14 +44,34 @@ def torch_rms_normalize(wav, ref_linear):
     wav = gain * wav
     return wav
 
-def load_wav(path):
+def load_wav(path, max_len=None, sr=None, pos=0):
     audio = wave.open(path, 'r')
     audio_len = audio.getnframes()
-    audio.setpos(0)
-    audio = audio.readframes(audio_len)
+
+    if sr is not None:
+        sr = audio.getframerate()
+        assert audio.getframerate() == sr, '[Sample rate] is not 16000 on file {}'.format(os.path.basename(path))
+        
+    if max_len is None:
+        max_len = audio_len
+        
+    if audio_len <= max_len or pos == 0:
+        audio.setpos(0)
+    elif pos == 'random':
+        audio.setpos(random.randint(0, audio_len-max_len))
+    audio = audio.readframes(max_len)    
     audio = np.frombuffer(audio, dtype=np.int16)
     audio = np.float32(audio / 2**15)
     return audio
+
+# def load_wav(path):
+#     audio = wave.open(path, 'r')
+#     audio_len = audio.getnframes()
+#     audio.setpos(0)
+#     audio = audio.readframes(audio_len)
+#     audio = np.frombuffer(audio, dtype=np.int16)
+#     audio = np.float32(audio / 2**15)
+#     return audio
 
 def dynamic_range_compression(x, C=1, clip_val=1e-5):
     return np.log(np.clip(x, a_min=clip_val, a_max=None) * C)
@@ -180,3 +200,22 @@ def mel_spectrogram(y, n_fft, num_mels, sampling_rate, hop_size, win_size, fmin,
     spec = spectral_normalize_torch(spec)
 
     return spec
+
+
+def mel_img(mel: np.ndarray, cmap) -> np.ndarray:
+    """Generate mel-spectrogram images.
+    Args:
+        mel: [np.float32; [mel, T]], mel-spectrogram.
+    Returns:
+        [np.float32; [3, mel, T]], mel-spectrogram in viridis color map.
+    """
+    # minmax norm in range(0, 1)
+    mel = (mel - mel.min()) / (mel.max() - mel.min() + 1e-7)
+    # in range(0, 255)
+    mel = (mel * 255).astype(np.uint8)
+    # [mel, T, 3]
+    mel = cmap[mel]
+    # [3, mel, T], make origin lower
+    mel = np.flip(mel, axis=0)
+    # mel = np.flip(mel, axis=0).transpose(2, 0, 1)
+    return mel
