@@ -17,7 +17,7 @@ from torch.utils.data.distributed import DistributedSampler
 
 from datasets.loader import Dataset
 # from networks.discriminator import Discriminator
-from hyface import Nansy, BShall_Ecapa, BShall_Nimbre
+from hyface import Nansy, BShall_Ecapa, BShall_Nimbre, BShall_Fimbre
 from hifigan.generator import HifiganGenerator
 from hifigan.discriminator import (
     HifiganDiscriminator,
@@ -43,9 +43,9 @@ class Solver(object):
 
         args.train.batch_size = int(args.train.batch_size / args.base_args.ngpus_per_node)
         self.trainset = Dataset(args, meta_root=os.path.join(args.base_args.meta_root, 'filelists'),
-                        mode='train', datasets=['vctk'], sample_rate=args.data.sample_rate)
+                        mode='train', datasets=args.data.datasets, sample_rate=args.data.sample_rate)
         self.validset = Dataset(args, meta_root=os.path.join(args.base_args.meta_root, 'filelists'),
-                        mode='valid', datasets=['vctk'], sample_rate=args.data.sample_rate)
+                        mode='valid', datasets=args.data.datasets, sample_rate=args.data.sample_rate)
         self.train_sampler = DistributedSampler(self.trainset, shuffle=True, rank=self.args.base_args.gpu)
         self.train_loader = DataLoader(self.trainset, batch_size=args.train.batch_size,
                                 shuffle=False, num_workers=args.base_args.workers,

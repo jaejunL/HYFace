@@ -10,6 +10,7 @@ from typing import Dict, Tuple
 import torch
 import torchaudio
 from torch.utils.data import DataLoader
+from torch.nn.utils.rnn import pad_sequence
 
 from PIL import Image
 import PIL
@@ -17,13 +18,12 @@ from torchvision import transforms
 
 from utils import data_utils, utils, audio_utils
 
-
-class F2V_Dataset(torch.utils.data.Dataset):
+class FaceNAudio_Spkwise(torch.utils.data.Dataset):
     def __init__(self,
                 args,
-                meta_root = 'filelists',
+                meta_root = 'filelists/VGG_Face',
                 mode='train',
-                img_datasets=['VGG_Face'],
+                img_datasets=['VGG_Face_Spk'],
                 sample_rate = 16000, 
                 ):
         self.args = args
@@ -41,11 +41,8 @@ class F2V_Dataset(torch.utils.data.Dataset):
         self.trans = transforms.Compose([transforms.Resize((args.features.image.size,args.features.image.size), interpolation=PIL.Image.BICUBIC),
                 transforms.CenterCrop(args.features.image.size), transforms.ToTensor(),
                 # transforms.Normalize(mean=[0.4850, 0.4560, 0.4060], std=[0.2290, 0.2240, 0.2250])])
-                transforms.Normalize(mean=[0.4845, 0.4065, 0.3725], std=[0.2290, 0.2240, 0.2250])])
+                transforms.Normalize(mean=[0.4829, 0.4049, 0.3712], std=[0.2643, 0.2398, 0.2335])])
 
-    def get_image(self, index):
-        img = Image.open()
-        
     def __getitem__(self, index):
         spkr = self.data_files[index % self.data_files_len]
         
@@ -67,6 +64,114 @@ class F2V_Dataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.data_files)*self.args.data.img_nums
+
+class FaceNEcapaAVg_Filewise(torch.utils.data.Dataset):
+    def __init__(self,
+                args,
+                meta_root = 'filelists/VGG_Face',
+                mode='train',
+                img_datasets=['VGG_Face'],
+                sample_rate = 16000,
+                ):
+        self.args = args
+        self.mode = mode
+        self.img_datasets = img_datasets
+        self.data_files = []
+        for dset in img_datasets:
+            meta_file_path = os.path.join(meta_root, '{}_{}.txt').format(dset, mode)
+            files = data_utils.load_text(meta_file_path)
+            self.data_files += files
+        self.data_files_len = len(self.data_files)
+        self.trans = transforms.Compose([transforms.Resize((args.features.image.size,args.features.image.size), interpolation=PIL.Image.BICUBIC),
+                transforms.CenterCrop(args.features.image.size), transforms.ToTensor(),
+                # transforms.Normalize(mean=[0.4850, 0.4560, 0.4060], std=[0.2290, 0.2240, 0.2250])])
+                transforms.Normalize(mean=[0.4829, 0.4049, 0.3712], std=[0.2643, 0.2398, 0.2335])])
+
+    def path_to_spk(self, path):
+        return os.path.basename(os.path.dirname(path))
+                                
+    def __getitem__(self, index):
+        # image load
+        img_path = self.data_files[index]
+        img = Image.open(img_path)
+        img_tensor = self.trans(img)
+
+        # audio load
+        spk = self.path_to_spk(img_path)
+        ecapa_avg = np.load(os.path.join(self.args.data.aud_datadir, spk + '.npy'))
+        
+        return img_tensor, torch.tensor(ecapa_avg)
+
+    def __len__(self):
+        return len(self.data_files)
+
+
+class Faubert_Dataset(torch.utils.data.Dataset):
+    def __init__(self,
+                args,
+                meta_root = 'filelists',
+                mode='train',
+                datasets=['VGG_Face'],
+                sample_rate = 16000, 
+                ):
+        self.args = args
+        self.mode = mode
+        self.datasets = datasets
+        self.sample_rate = sample_rate
+        self.max_sec = 4
+        self.max_len = sample_rate * self.max_sec
+        self.data_files = []
+        for dset in datasets:
+            meta_file_path = os.path.join(meta_root, '{}_{}.txt').format(dset, mode)
+            files = data_utils.load_text(meta_file_path)
+            self.data_files += files
+        self.trans = transforms.Compose([transforms.Resize((args.features.image.size,args.features.image.size), interpolation=PIL.Image.BICUBIC),
+                transforms.CenterCrop(args.features.image.size), transforms.ToTensor(),
+                transforms.Normalize(mean=[0.4829, 0.4049, 0.3712], std=[0.2643, 0.2398, 0.2335])])
+
+    def __getitem__(self, index):
+        # image load
+        img_path = self.data_files[index]
+        img = Image.open(img_path)
+        img_tensor = self.trans(img)
+        
+        # audio load
+        aud_folder = os.path.dirname(img_path).replace('VGG_Face2/data','VoxCeleb2/VoxCeleb2')
+        aud_names = os.listdir(aud_folder)
+        random_aud_name = random.choice(aud_names)
+        aud_path = os.path.join(aud_folder, random_aud_name)
+        aud, pos = audio_utils.load_wav(path=aud_path, max_len=self.max_len, pos='random')
+        
+        # hubert load
+        hubert_pos = int(pos / 320)
+        hubert_path = aud_path.replace('original', 'modified/hubert_soft').replace('.wav', '.emb')
+        hubert_emb = torch.load(hubert_path).squeeze(0)[hubert_pos:hubert_pos+self.max_sec*50]
+        return img_tensor, aud, hubert_emb
+
+    def collate(self, bunch: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+        """Collate bunch of datum to the batch data.
+        Args:
+            bunch: B x [np.float32; [T]], speech signal.
+        Returns:
+            batch data.
+                speeches: [np.float32; [B, T]], speech signal.
+                lengths: [np.long; [B]], speech lengths.
+        """
+        img_pad = torch.stack([img_tensor for img_tensor, _, _ in bunch])
+        # [B]
+        frame_lengths = np.array([hubert_emb.shape[0]*2 for _, _, hubert_emb in bunch])
+        # []
+        max_framelen = frame_lengths.max()
+        # [B, T]
+        aud_pad = np.stack([
+            np.pad(aud[:frame_lengths[i]*160], [0, max_framelen*160 - frame_lengths[i]*160]) for i, (img, aud, _) in enumerate(bunch)])
+        hubert_pad = pad_sequence([hubert_emb for _, _, hubert_emb in bunch]).transpose(0,1)
+        data = {'image':img_pad, 'audio':aud_pad, 'hubert':hubert_pad.transpose(-1,-2), 'frame_lengths':frame_lengths}
+        return data
+
+    def __len__(self):
+        return len(self.data_files)
+
 
 class TMP_Dataset(torch.utils.data.Dataset):
     def __init__(self,

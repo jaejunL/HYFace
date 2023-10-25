@@ -28,6 +28,7 @@
       }
   },
   "model": {
+    "name":"hyface",  
     "generator":"bshall",
     "pretrained":0,
     "leak":0.01,

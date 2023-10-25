@@ -50,20 +50,32 @@ def load_wav(path, max_len=None, sr=None, pos=0):
 
     if sr is not None:
         sr = audio.getframerate()
-        assert audio.getframerate() == sr, '[Sample rate] is not 16000 on file {}'.format(os.path.basename(path))
+        assert audio.getframerate() == sr, '[Sample rate] is not {} on file {}'.format(str(sr), os.path.basename(path))
         
     if max_len is None:
         max_len = audio_len
-        
-    if audio_len <= max_len or pos == 0:
-        audio.setpos(0)
-    elif pos == 'random':
-        audio.setpos(random.randint(0, audio_len-max_len))
-    audio = audio.readframes(max_len)    
-    audio = np.frombuffer(audio, dtype=np.int16)
-    audio = np.float32(audio / 2**15)
-    return audio
 
+    if pos == 0:
+        audio.setpos(0)
+        audio = audio.readframes(max_len)    
+        audio = np.frombuffer(audio, dtype=np.int16)
+        audio = np.float32(audio / 2**15)
+        return audio
+    elif pos == 'random':            
+        if audio_len <= max_len:
+            audio.setpos(0)
+            audio = audio.readframes(max_len)    
+            audio = np.frombuffer(audio, dtype=np.int16)
+            audio = np.float32(audio / 2**15)
+            return audio, 0
+        else:
+            rand_pos = random.randint(0, audio_len-max_len)
+            audio.setpos(rand_pos)
+            audio = audio.readframes(max_len)
+            audio = np.frombuffer(audio, dtype=np.int16)
+            audio = np.float32(audio / 2**15)
+        return audio, rand_pos
+    
 # def load_wav(path):
 #     audio = wave.open(path, 'r')
 #     audio_len = audio.getnframes()

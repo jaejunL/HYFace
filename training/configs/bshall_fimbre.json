@@ -1,0 +1,86 @@
+{
+  "train": {
+    "batch_size": 256,
+    "learning_rate_g":1e-4,
+    "weight_decay":5e-7,
+    "beta1":0.95,
+    "beta2":0.999,
+    "tau":0.05,
+    "mae_weight":0.001,
+    "discriminator":0,
+    "log_interval": 10,
+    "save_model_interval": 1,
+    "sample_interval": 5,
+    "seed": 1234,
+    "total_epochs": 20000
+  },
+  "data": {
+    "img_datasets":["VGG_Face"],
+    "img_nums":96,
+    "img_datadir":"/disk2/VGG_Face2/data/original",
+    "aud_datadir":"/disk2/VoxCeleb2/VoxCeleb2/modified/ecapa_avg",
+    "sample_rate":16000,
+    "seg_sec":4,
+    "aud_pos":"random"
+  },
+  "features": {
+    "image": {
+      "size": 112,
+      "channels": 3
+      },
+    "mel": {
+      "bin" : 80,
+      "hop": 160,
+      "win": 1024,
+      "win_fn": "hann",
+      "fmin": 0,
+      "fmax": 8000
+      }
+  },
+  "model": {
+    "name":"f2v",
+    "generator":"vits_face",
+    "pretrained":0,
+    "leak":0.01,
+    "dropout":0.1,
+    "linguistic": {
+      "hiddens":256,
+      "output_dim":512
+    },
+    "timbre": {
+      "query_path":"/disk3/jaejun/hyface/bhsall_nimbre/timbre_query.pth",
+      "type":"nimbre",
+      "global_":192,
+      "output_dim":512,
+      "channels":512,
+      "prekernels":5,
+      "scale":8,
+      "kernels":3,
+      "dilations":[2,3,4],
+      "bottleneck":128,
+      "hiddens":1536,
+      "latent":512,
+      "timbre":128,
+      "tokens":50,
+      "heads":8,
+      "slerp":0.5
+      },
+    "synthesizer": {
+      "prenet_indim":256,
+      "decoder_dim":1024,
+      "sample_rate":16000
+      },
+    "vit": {
+      "patch_size":8,
+      "ac_patch_size":12,
+      "pad":4,
+      "dim":512,
+      "depth":20,
+      "heads":8,
+      "mlp_dim":2048,
+      "dim_head":64,
+      "dropout":0.1,
+      "emb_dropout":0.1
+      }
+    }
+}

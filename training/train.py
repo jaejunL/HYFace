@@ -6,13 +6,19 @@ import torch
 import torch.multiprocessing as mp
 import torch.distributed as dist
 
-from solver import Solver
 from utils import utils
 
 def train(args, run=None):
     wandb.require(experiment="service")
     wandb.setup()
     
+    if args.model.name == "hyface":
+        from solver import Solver
+    elif args.model.name == "f2v":
+        if args.model.timbre.type == 'ecapa':
+            from solver_f2v import Solver
+        elif args.model.timbre.type == 'nimbre':
+            from solver_fimber import Solver
     solver = Solver(args)
     
     ngpus_per_node = int(torch.cuda.device_count()/args.base_args.n_nodes)
@@ -64,7 +70,7 @@ def worker(gpu, solver, ngpus_per_node, args):
         if args.base_args.rank % ngpus_per_node == 0:
             if epoch % args.train.save_model_interval == 0:
                 checkpoint_dir = os.path.join(args.base_args.base_dir, 'checkpoints')
-                utils.save_checkpoint(solver.net['hyface'], solver.optim['g'], None, epoch,
+                utils.save_checkpoint(solver.net[args.model.name], solver.optim['g'], None, epoch,
                             os.path.join(checkpoint_dir, "G_{}.pth".format(epoch)))
             end_time = time.time()
             # solver.save_audio(args, epoch, solver.validset[0])

@@ -127,6 +127,29 @@ def load_ecapa_checkpoint(checkpoint_path, models):
     print("#########*********************************#########\n")
     return models
 
+def load_vitface_checkpoint(checkpoint_path, models):
+    assert os.path.isfile(checkpoint_path)
+    checkpoint_dict = torch.load(checkpoint_path)
+    if hasattr(models, 'module'):
+        self_state = models.module.state_dict()
+    else:
+        self_state = models.state_dict()    
+    print("######### Pretrained model loading - Vit_Face #########")
+    for name, param in checkpoint_dict.items():
+        origname = name
+        if name not in self_state:
+            name = name.replace("module.", "")
+            if name not in self_state:
+                print("%s is not in the model."%origname)
+                continue
+        if self_state[name].size() != checkpoint_dict[origname].size():
+            print("Wrong parameter length: %s, model: %s, loaded: %s"%(origname, self_state[name].size(), checkpoint_dict[origname].size()))
+            continue
+        self_state[name].copy_(param)
+    print("#########*********************************#########\n")
+    return models
+  
+  
 def latest_checkpoint_path(dir_path, regex="G_*.pth"):
   f_list = glob.glob(os.path.join(dir_path, regex))
   f_list.sort(key=lambda f: int("".join(filter(str.isdigit, f))))

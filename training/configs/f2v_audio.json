@@ -1,0 +1,74 @@
+{
+  "train": {
+    "batch_size": 256,
+    "learning_rate_g":1e-4,
+    "learning_rate_d":2e-4,
+    "beta1":0.9,
+    "beta2":0.999,
+    "tau":0.05,
+    "discriminator":0,
+    "log_interval": 10,
+    "save_model_interval": 5,
+    "sample_interval": 5,
+    "seed": 1234,
+    "total_epochs": 20000
+  },
+  "data": {
+    "img_datasets":["VGG_Face_Spk"],
+    "img_nums":96,
+    "img_datadir":"/disk2/VGG_Face2/data/original",
+    "aud_datadir":"/disk2/VoxCeleb2/VoxCeleb2/original",
+    "sample_rate":16000,
+    "seg_sec":4
+  },
+  "features": {
+    "image": {
+      "size": 224
+      },
+    "mel": {
+      "bin" : 80,
+      "hop": 160,
+      "win": 1024,
+      "win_fn": "hann",
+      "fmin": 0,
+      "fmax": 8000
+      }
+  },
+  "model": {
+    "name":"f2v",
+    "generator":"bshall",
+    "pretrained":"bshall",
+    "leak":0.01,
+    "dropout":0.1,
+    "linguistic": {
+      "hiddens":256,
+      "output_dim":512
+    },
+    "timbre": {
+      "type":"ecapa",
+      "global_":192,
+      "output_dim":256,
+      "channels":512,
+      "prekernels":5,
+      "scale":8,
+      "kernels":3,
+      "dilations":[2,3,4],
+      "bottleneck":128,
+      "hiddens":1536,
+      "latent":512,
+      "timbre":128,
+      "tokens":50,
+      "heads":8,
+      "slerp":0.5
+      },
+    "synthesizer": {
+      "prenet_indim":256,
+      "decoder_dim":768,
+      "sample_rate":16000
+      },
+    "vit": {
+      "pretrained":0,
+      "hidden":768
+      }
+    }
+}

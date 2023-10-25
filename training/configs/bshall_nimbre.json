@@ -28,15 +28,18 @@
       }
   },
   "model": {
+    "name":"hyface",
     "generator":"bshall",
     "leak":0.01,
     "dropout":0.1,
     "linguistic": {
-      "hiddens":256
+      "hiddens":256,
+      "output_dim":512
     },
     "timbre": {
       "type":"nansy",
       "global_":192,
+      "output_dim":512,
       "channels":512,
       "prekernels":5,
       "scale":8,

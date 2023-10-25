@@ -14,6 +14,7 @@ import torchaudio.transforms as transforms
 
 from speechbrain.pretrained import EncoderClassifier
 
+from networks.fimbre import FimbreEncoder
 from networks.timbre import TimbreEncoder
 from networks.synthesizer import FrameLevelSynthesizer
 from networks.bshall import AcousticModel
@@ -104,7 +105,8 @@ class BShall_Ecapa(nn.Module):
         self.args = args
         self.logmel = LogMelSpectrogram(sample_rate=args.data.sample_rate, n_fft=args.features.mel.win,
                 hop_length=args.features.mel.hop, win_length=args.features.mel.win, n_mels=args.features.mel.bin, center=False)
-        self.classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", run_opts={"device":"cuda"})
+        
+        self.classifier = EncoderClassifier.from_hparams(source="speechbrain/spkrec-ecapa-voxceleb", run_opts={"device":"cuda" if "gpus" in args else "cpu"})
         self.frame_synth = AcousticModel(args.model.linguistic.hiddens, args.model.linguistic.output_dim,
                     args.model.timbre.global_, args.model.timbre.output_dim,
                     args.model.synthesizer.decoder_dim, args.features.mel.bin, True)
@@ -195,7 +197,8 @@ class BShall_Nimbre(nn.Module):
                     args.model.timbre.global_, args.model.timbre.channels, args.model.timbre.prekernels, args.model.timbre.scale, args.model.timbre.kernels,
                     args.model.timbre.dilations, args.model.timbre.bottleneck, args.model.timbre.hiddens, args.model.timbre.latent, args.model.timbre.timbre,
                     args.model.timbre.tokens, args.model.timbre.heads, args.model.linguistic.hiddens + args.model.timbre.global_, args.model.timbre.slerp)
-        self.frame_synth = AcousticModel(args.model.linguistic.hiddens, args.model.timbre.global_,
+        self.frame_synth = AcousticModel(args.model.linguistic.hiddens, args.model.linguistic.output_dim,
+                    args.model.timbre.global_, args.model.timbre.output_dim,
                     args.model.synthesizer.decoder_dim, args.features.mel.bin, True)
 
     def analyze_timbre(self, inputs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -235,3 +238,56 @@ class BShall_Nimbre(nn.Module):
         # [B, T]
         synth = self.synthesize(ling, timber_global, timber_bank)
         return synth, timber_global, timber_bank
+    
+    
+class BShall_Fimbre(nn.Module):
+    def __init__(self, args):
+        super().__init__()
+        self.args = args
+        self.fimbre = FimbreEncoder(args.features.image.size, args.features.image.channels,
+                    args.model.timbre.global_, args.model.timbre.channels,
+                    args.model.vit.patch_size, args.model.vit.ac_patch_size, args.model.vit.pad, args.model.vit.dim,
+                    args.model.vit.depth, args.model.vit.heads, args.model.vit.mlp_dim, args.model.vit.dim_head,
+                    args.model.vit.dropout, args.model.vit.emb_dropout,
+                    len(args.model.timbre.dilations), args.model.timbre.bottleneck, args.model.timbre.hiddens, args.model.timbre.latent, args.model.timbre.timbre,
+                    args.model.timbre.tokens, args.model.linguistic.hiddens + args.model.timbre.global_, args.model.timbre.slerp)
+        self.frame_synth = AcousticModel(args.model.linguistic.hiddens, args.model.linguistic.output_dim,
+                    args.model.timbre.global_, args.model.timbre.output_dim,
+                    args.model.synthesizer.decoder_dim, args.features.mel.bin, True)
+
+    def analyze_fimbre(self, inputs: torch.Tensor, fimber_query: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+        """Analyze the timber informations from inputs.
+        Args:
+            inputs: [torch.float32; [B, T]], input speech signal.
+        Returns:
+            [torch.float32; [B, timb_global]], global timber emebddings.
+            [torch.float32; [B, timb_timber, timb_tokens]], timber token bank.
+        """
+        # [B, timb_global], [B, timb_timber, timb_tokens]
+        fimber_global, fimber_bank = self.fimbre.forward(inputs, fimber_query)
+        return fimber_global, fimber_bank
+
+    def synthesize(self,
+                   ling: torch.Tensor,
+                   fimber: torch.Tensor) \
+            -> Tuple[torch.Tensor, torch.Tensor]:
+        # S
+        ling_len = ling.shape[-1]
+        fimber_global, fimber_bank = fimber
+        # [B, ling_hiddens + timb_global, S]
+        contents = torch.cat([
+            ling, fimber_global[..., None].repeat(1, 1, ling_len)], dim=1)
+        # [B, fimber_global, S]
+        fimber_sampled = self.fimbre.sample_fimber(contents, fimber_global, fimber_bank)
+        # [B, ling_hiddens, S]
+        frame = self.frame_synth.forward(ling.transpose(1, 2), fimber_sampled.transpose(1, 2))
+        # [B, T], [B, T]
+        return frame.transpose(1, 2)
+
+    def forward(self, inputs: torch.Tensor, ling: torch.Tensor) \
+            -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
+        fimber_global, fimber_bank = self.analyze_fimbre(inputs)
+        # [B, T]
+        synth = self.synthesize(ling, fimber_global, fimber_bank)
+        return synth, fimber_global, fimber_bank
+    
