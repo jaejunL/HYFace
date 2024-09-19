@@ -11,7 +11,7 @@ And also, don't miss our [demo](https://jaejunl.github.io/HYFace_Demo/).
 ## Dataset
 We used LRS3 dataset ([arxiv](https://arxiv.org/abs/1809.00496), [website](https://mmai.io/datasets/lip_reading/)), consists of 5,502 videos from TED and TEDx.
 
-### Dataset Configuration
+### Configuration
 Simply place the dataset in the `original` directory with the following file structure:
 ```
 original
