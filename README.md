@@ -8,7 +8,10 @@ This repository contains the official implementation of our paper
 
 And also, don't miss our [demo](https://jaejunl.github.io/HYFace_Demo/).
 
-## Dataset
+# Intro
+This implementation is built upon a __so-vits-svc__ ([link](https://github.com/svc-develop-team/so-vits-svc)), a dedicated project for singing voice conversion. We highly recommend exploring their page for further explanations of the module we used, except for those related to face image processing.
+
+# Dataset
 We used LRS3 dataset ([arxiv](https://arxiv.org/abs/1809.00496), [website](https://mmai.io/datasets/lip_reading/)), consists of 5,502 videos from TED and TEDx.
 
 ### Configuration
@@ -26,27 +29,8 @@ original
 └───test
 ```
 
-## Preprocessing
-We highly recommend using multi-processing, as all the provided codes below are single-process based and can be quite slow.
-### Video split
-Running `preprocessing/video_processing.py` will split the original videos into 25fps images and 16kHz audio files.
-```
-python preprocessing/video_processing.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
-```
-### Frontal image sifting
-Download the frontal face detector and place it in the same root as `original`.
-
-We used OpenCV Haarcascades model `haarcascade_frontalface_default.xml` ([link](https://github.com/kipr/opencv/tree/master/data/haarcascades)), but you can use your own.
-
-Then run `preprocessing/img_frontal.py`, it will copy only centured face images into the `modified/imgs` directory.
-```
-python preprocessing/img_frontal.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
-```
-
-### Wav split
-
-
-After running our preprocessing module, the preprocessed dataset in the `modified` directory will have the following structure:
+# Preprocessing
+After running our all preprocessing modules, the preprocessed dataset in the `modified` directory will have the following structure:
 ```
 modified
 ├───imgs
@@ -61,19 +45,46 @@ modified
 │   │   └───Speaker n
 │   └───trainval
 │   └───test
-├───audios
-│   ├───pretrain
-│   │   ├───Speaker 1
-│   │   │   ├───00001.wav, 00001.emb
-│   │   │   ├───...
-│   │   │   └───xxxxx.wav, xxxxx.emb
-│   │   ├───...
-│   │   └───Speaker n
-│   └───trainval
-│   └───test
+└───auds
+    ├───pretrain
+    │   ├───Speaker 1
+    │   │   ├───00001.wav, 00001.emb
+    │   │   ├───...
+    │   │   └───xxxxx.wav, xxxxx.emb
+    │   ├───...
+    │   └───Speaker n
+    └───trainval
+    └───test
+```
+We recommend using multi-processing, as all the provided codes below are single-process based and can be quite slow.
+
+### Video split
+Running `preprocessing/video_processing.py` will split the original videos into 25fps images and 16kHz audio files.
+```
+python preprocessing/video_processing.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
 
+### Frontal image sifting
+Download the frontal face detector and place it in the same root as `original`.\
+We used OpenCV Haarcascades model `haarcascade_frontalface_default.xml` ([link](https://github.com/kipr/opencv/tree/master/data/haarcascades)), but you can use your own.\
+Then run `preprocessing/img_frontal.py`, it will copy only centured face images into the `modified/imgs` directory.
+```
+python preprocessing/img_frontal.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
+```
 
-## Preprocessing
+### Wav split
+We split any wav files longer than 10 seconds into multiple shorter sub-files.
+```
+python preprocessing/wav_split.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
+```
 
+### ContentVec save
+Extract the ContentVec embeddings from the split wav files. We used the Huggin Face version by _lengyue233_ ([Link](https://huggingface.co/lengyue233/content-vec-best)).\
+The code below will automatically download and save the Hugging Face model.
+```
+CUDA_VISIBLE_DEVICES=0 python preprocessing/contentvec_save.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
+```
+
+### F0 extract
+For extracting F0 information, we use [FCPE(Fast Context-base Pitch Estimator)](https://github.com/CNChTu/FCPE), download the pre-trained model ([fcpe.pt](https://huggingface.co/datasets/ylzz1997/rmvpe_pretrain_model/resolve/main/fcpe.pt)) and place in under the `pretrain` directory.
 
