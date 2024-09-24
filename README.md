@@ -48,9 +48,9 @@ modified
 └───auds
     ├───pretrain
     │   ├───Speaker 1
-    │   │   ├───00001.wav, 00001.emb
+    │   │   ├───00001.wav, 00001.emb, 00001.f0.npy
     │   │   ├───...
-    │   │   └───xxxxx.wav, xxxxx.emb
+    │   │   └───xxxxx.wav, xxxxx.emb, xxxxx.f0.npy
     │   ├───...
     │   └───Speaker n
     └───trainval
