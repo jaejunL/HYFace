@@ -25,6 +25,27 @@ original
 └───trainval
 └───test
 ```
+
+## Preprocessing
+We highly recommend using multi-processing, as all the provided codes below are single-process based and can be quite slow.
+### Video split
+Running `preprocessing/video_processing.py` will split the original videos into 25fps images and 16kHz audio files.
+```
+python preprocessing/video_processing.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
+```
+### Frontal image sifting
+Download the frontal face detector and place it in the same root as `original`.
+
+We used OpenCV Haarcascades model `haarcascade_frontalface_default.xml` ([link](https://github.com/kipr/opencv/tree/master/data/haarcascades)), but you can use your own.
+
+Then run `preprocessing/img_frontal.py`, it will copy only centured face images into the `modified/imgs` directory.
+```
+python preprocessing/img_frontal.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
+```
+
+### Wav split
+
+
 After running our preprocessing module, the preprocessed dataset in the `modified` directory will have the following structure:
 ```
 modified
