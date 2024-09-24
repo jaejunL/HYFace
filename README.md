@@ -1,5 +1,5 @@
 # Hear Your Face: Face-based voice conversion with F0 estimation
-This repository contains the implementation of our paper
+This repository contains the official implementation of our paper
 ([link](https://www.isca-archive.org/interspeech_2024/lee24d_interspeech.html),
 [arxiv](https://www.arxiv.org/abs/2408.09802))
 , _Hear Your Face: Face-based voice conversion with F0 estimation_, published at Interspeech 2024.
