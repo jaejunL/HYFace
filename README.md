@@ -92,3 +92,9 @@ Not only does it save the F0 information in the shape `(2, n)` (representing fra
 ```
 python preprocessing/f0_extract.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
+
+# Train
+
+# Inference
+
+
