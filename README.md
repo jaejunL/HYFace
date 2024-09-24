@@ -55,6 +55,7 @@ modified
     │   └───Speaker n
     └───trainval
     └───test
+    └───avg_mu_pretrain.pickle, avg_mu_trainval.pickle, avg_mu_test.pickle
 ```
 We recommend using multi-processing, as all the provided codes below are single-process based and can be quite slow.
 
@@ -86,7 +87,8 @@ CUDA_VISIBLE_DEVICES=0 python preprocessing/contentvec_save.py --lrs3_root 'your
 ```
 
 ### F0 extracting
-For extracting F0 information, we use [FCPE(Fast Context-base Pitch Estimator)](https://github.com/CNChTu/FCPE), download the pre-trained model ([fcpe.pt](https://huggingface.co/datasets/ylzz1997/rmvpe_pretrain_model/resolve/main/fcpe.pt)) and place in under the `pretrain` directory. Then run the code below.
+For extracting F0 information, we use [FCPE(Fast Context-base Pitch Estimator)](https://github.com/CNChTu/FCPE), download the pre-trained model ([fcpe.pt](https://huggingface.co/datasets/ylzz1997/rmvpe_pretrain_model/resolve/main/fcpe.pt)) and place in under the `pretrain` directory. Then run the code below.\
+Not only does it save the F0 information in the shape `(2, n)` (representing frame-wise F0 values and VAD (voice activicy detection) values), but it also automatically saves speaker-wise average F0 values in a pickle file, such as `modified/auds/avg_mu_pretrain.pickle`.
 ```
 python preprocessing/f0_extract.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
