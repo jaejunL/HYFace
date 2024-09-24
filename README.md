@@ -85,6 +85,8 @@ The code below will automatically download and save the Hugging Face model.
 CUDA_VISIBLE_DEVICES=0 python preprocessing/contentvec_save.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
 
-### F0 extract
-For extracting F0 information, we use [FCPE(Fast Context-base Pitch Estimator)](https://github.com/CNChTu/FCPE), download the pre-trained model ([fcpe.pt](https://huggingface.co/datasets/ylzz1997/rmvpe_pretrain_model/resolve/main/fcpe.pt)) and place in under the `pretrain` directory.
-
+### F0 extracting
+For extracting F0 information, we use [FCPE(Fast Context-base Pitch Estimator)](https://github.com/CNChTu/FCPE), download the pre-trained model ([fcpe.pt](https://huggingface.co/datasets/ylzz1997/rmvpe_pretrain_model/resolve/main/fcpe.pt)) and place in under the `pretrain` directory. Then run the code below.
+```
+python preprocessing/f0_extract.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
+```
