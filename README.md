@@ -9,7 +9,8 @@ This repository contains the official implementation of our paper
 And also, don't miss our [demo](https://jaejunl.github.io/HYFace_Demo/).
 
 # Intro
-This implementation is built upon a __so-vits-svc__ ([link](https://github.com/svc-develop-team/so-vits-svc)), a dedicated project for singing voice conversion. We highly recommend exploring their page for further explanations of the module we used, except for those related to face image processing.
+This implementation is built upon a __so-vits-svc__ ([link](https://github.com/svc-develop-team/so-vits-svc)), a dedicated project for singing voice conversion. We highly recommend exploring their page for further explanations of the module we used, except for those related to face image processing.\
+For face image processing, we use a Vision Transformer (ViT) similar to the implementation of Face-Transformer ([Link](https://github.com/zhongyy/Face-Transformer/tree/main/copy-to-vit_pytorch-path)).
 
 # Dataset
 We used LRS3 dataset ([arxiv](https://arxiv.org/abs/1809.00496), [website](https://mmai.io/datasets/lip_reading/)), consists of 5,502 videos from TED and TEDx.
@@ -94,6 +95,16 @@ python preprocessing/f0_extract.py --lrs3_root 'your-LRS3-original-root' --types
 ```
 
 # Train
+For training, both the 'main' model (our primary voice conversion model) and the 'sub' model (Average F0 estimation network) need to be trained. For more details, please refer to our paper.
+
+### Training the main model
+```
+python main.py --write_root='your-model-save-root' --exp_name=main --gpus=1,2
+```
+### Training the sub model
+```
+python main.py --write_root='your-model-save-root' --exp_name=sub --gpus=3,4
+```
 
 # Inference
 
