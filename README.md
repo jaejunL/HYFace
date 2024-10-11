@@ -99,11 +99,11 @@ For training, both the 'main' model (our primary voice conversion model) and the
 
 ### Training the main model
 ```
-python main.py --write_root='your-model-save-root' --exp_name=main --gpus=1,2
+python main.py --write_root='your-model-save-root' --model=main --gpus=1,2
 ```
 ### Training the sub model
 ```
-python main.py --write_root='your-model-save-root' --exp_name=sub --gpus=3,4
+python main.py --write_root='your-model-save-root' --model=sub --gpus=3,4
 ```
 
 # Inference
