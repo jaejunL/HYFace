@@ -83,16 +83,6 @@ We split any wav files longer than 10 seconds into multiple shorter sub-files.
 python preprocessing/video_processing.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
 
-### (Optional) Frontal image sifting
-> This step can take a significant amount of time. Although we used only frontal images for training in our paper, we found that skipping this preprocessing step does not lead to significant performance degradation. Therefore, we recommend skipping this step, or alternatively, using your own method for selecting frontal images.
-
-Download the frontal face detector and place it in the same root as `original`.\
-We used OpenCV Haarcascades model `haarcascade_frontalface_default.xml` ([link](https://github.com/kipr/opencv/tree/master/data/haarcascades)), but you can use your own.\
-Then run `preprocessing/img_frontal.py`, it will copy only centured face images into the `modified/imgs` directory.
-```
-python preprocessing/img_frontal.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
-```
-
 <!--
 ### Wav split
 We split any wav files longer than 10 seconds into multiple shorter sub-files.
@@ -113,6 +103,16 @@ For extracting F0 information, we use [FCPE(Fast Context-base Pitch Estimator)](
 Not only does it save the F0 information in the shape `(2, n)` (representing frame-wise F0 values and VAD (voice activicy detection) values), but it also automatically saves speaker-wise average F0 values in a pickle file, such as `modified/avg_mu_pretrain.pickle`.
 ```
 python preprocessing/f0_extract.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
+```
+
+### (Optional) Frontal image sifting
+> This step can take a significant amount of time. Although we used only frontal images for training in our paper, we found that skipping this preprocessing step does not lead to significant performance degradation. Therefore, we recommend skipping this step, or alternatively, using your own method for selecting frontal images.
+
+Download the frontal face detector and place it in the same root as `original`.\
+We used OpenCV Haarcascades model `haarcascade_frontalface_default.xml` ([link](https://github.com/kipr/opencv/tree/master/data/haarcascades)), but you can use your own.\
+Then run `preprocessing/img_frontal.py`, it will copy only centured face images into the `modified/imgs` directory.
+```
+python preprocessing/img_frontal.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
 
 # Train
