@@ -1,0 +1,2 @@
+deepface==0.0.79
+Resemblyzer==0.1.4

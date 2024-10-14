@@ -14,7 +14,7 @@ def train(args, run=None):
     wandb.setup()
     
     ngpus_per_node = int(torch.cuda.device_count()/args.base_args.n_nodes)
-    print("use {} gpu machine".format(ngpus_per_node))
+    print("use {} gpu mac hine".format(ngpus_per_node))
     args.base_args.world_size = ngpus_per_node * args.base_args.n_nodes
     
     if args.base_args.model == "main":
