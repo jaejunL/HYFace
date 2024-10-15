@@ -74,7 +74,7 @@ modified
 └───avg_mu_pretrain.pickle, avg_mu_trainval.pickle, avg_mu_test.pickle
 
 ```
-We recommend using multi-processing, as all the provided codes below are single-process based and can be quite slow.
+We recommend using multi-processing, as all the provided codes below are single-process based and can be quite slow, especially for 'video_processing.py'.
 
 ### Video split
 Running `preprocessing/video_processing.py` will split the original videos into 25fps images and 16kHz audio files.\
