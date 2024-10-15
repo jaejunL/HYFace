@@ -115,6 +115,12 @@ Then run `preprocessing/img_frontal.py`, it will copy only centured face images 
 python preprocessing/img_frontal.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
 
+# Inference
+For inference, first save the main model weights ('main.pth') and sub model weights ('sub.pth') in the 'pretrain' folder. Next, save your source audio file ('source.wav') and target face image file ('target.jpg') in the 'inference' folder. Altenatively, you can use your own file paths by referring to the parser inside `inference.py` file. Then, run the code below.
+```
+CUDA_VISIBLE_DEVICES=0 python inference/inference.py
+```
+
 # Train
 For training, both the 'main' model (our primary voice conversion model) and the 'sub' model (Average F0 estimation network) need to be trained. For more details, please refer to our paper.
 
