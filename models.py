@@ -224,7 +224,7 @@ class SynthesizerTrn(nn.Module):
             p_dropout=p_dropout
         )
         hps = {
-            "sampling_rate": 44100,
+            "sampling_rate": sampling_rate,
             "inter_channels": inter_channels,
             "resblock": resblock,
             "resblock_kernel_sizes": resblock_kernel_sizes,

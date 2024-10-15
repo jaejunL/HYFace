@@ -67,3 +67,4 @@ for typ in types:
 print('\n')
 
 # python preprocessing/f0_extract.py --lrs3_root '/disk2/LRS3/original' --types test trainval pretrain
+# python preprocessing/f0_extract.py --lrs3_root '/disk2/LRS3/original' --types test

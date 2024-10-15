@@ -81,17 +81,6 @@ class Evalset(torch.utils.data.Dataset):
         audio_norm = audio_norm.unsqueeze(0)
         return audio_norm
 
-    # def load_uv(self, wav_dir):
-    #     wav, sr = librosa.load(wav_dir, sr=16000)
-    #     wav, _ = librosa.effects.trim(wav, top_db=40)
-    #     # normalize peak
-    #     peak = np.abs(wav).max()
-    #     if peak > 1.0:
-    #         wav = 0.98 * wav / peak
-    #     wav44 = librosa.resample(wav, orig_sr=16000, target_sr=44100)
-    #     _, uv = self.f0_predictor.compute_f0_uv(wav44)
-    #     return torch.FloatTensor(np.array(uv,dtype=float))
-
     def load_img(self, img_dir):
         img = Image.open(img_dir)
         img_tensor = self.trans(img)
@@ -102,9 +91,7 @@ class Evalset(torch.utils.data.Dataset):
         aud_dir = self.aud_dirs[index]
         img_dir = self.img_dirs[int(50*r_index+q_index)]
         aud = self.load_wav(aud_dir)
-        # uv = self.load_uv(aud_dir)
         img = self.load_img(img_dir)
-        # gtwav_dir = self.aud_dirs[(index+1) % 50]
         target_speaker = self.target_speakers[int(50*r_index+q_index)]
         return aud, img, aud_dir, img_dir, target_speaker
             
@@ -115,14 +102,11 @@ class Evalset_Collate:
     def __call__(self, batch):
         batch = [b for b in batch if b is not None]
         max_wav_len = max([x[0].shape[-1] for x in batch])
-        # max_uv_len = max([x[2].shape[-1] for x in batch])
         
         wav_padded = torch.FloatTensor(len(batch), max_wav_len)
         face_padded = torch.FloatTensor(len(batch), 3, 112, 112)
-        # uv_padded = torch.FloatTensor(len(batch), max_uv_len)
         wav_padded.zero_()
         face_padded.zero_()
-        # uv_padded.zero_()
         
         aud_dirs = []
         img_dirs = []
@@ -133,11 +117,8 @@ class Evalset_Collate:
             wav_padded[i, :wav.size(1)] = wav
             face = batch[i][1]
             face_padded[i] = face
-            # uv = batch[i][2]
-            # uv_padded[i, :uv.shape[-1]] = uv
             aud_dirs.append(batch[i][2])
             img_dirs.append(batch[i][3])
-            # gtwav_dirs.append(batch[i][4])
             target_speakers.append(batch[i][4])
         return wav_padded, face_padded, aud_dirs, img_dirs, target_speakers
     
@@ -166,8 +147,6 @@ class HYFace_Conversion(object):
         source_c = self.hyface_netc(source_c)["last_hidden_state"]
         source_c = F.interpolate(source_c.transpose(-1,-2), source_c.shape[1]*2, mode="nearest")
         target_f0, _ = self.hyface_netf.infer(target_f)
-        # uv = F.interpolate(uv.unsqueeze(1), source_c.shape[-1], mode="nearest")
-        # synth, _ = self.hyface_netg.infer(source_c, None, uv.squeeze(1), 0.35, avgf0=target_f0, face=target_f)
         synth, _ = self.hyface_netg.infer(source_c, None, None, 1, avgf0=target_f0, face=target_f)
         return synth.detach().cpu()
 
@@ -258,8 +237,7 @@ if __name__ == "__main__":
     parser.add_argument('--img_root', type=str, default='/disk2/LRS3/modified_original/imgs', help='your-LRS3-img-root')
     parser.add_argument('--main_epoch', type=str, default=400, help='your-main-model-epoch')
     parser.add_argument('--sub_epoch', type=str, default=20, help='your-sub-model-epoch')
-    parser.add_argument('--target_gender', type=str, default='male', help='target gender')
-    parser.add_argument('--batch_size', type=int, default=100, help='batch size of test set Dataloader')
+    parser.add_argument('--batch_size', type=int, default=1, help='batch size of test set Dataloader')
     parser.add_argument('--seed', type=int, default=1234, help='random seed')
     parser.add_argument('--save_samples', type=int, default=0)
     base_args = parser.parse_args()
@@ -282,11 +260,8 @@ if __name__ == "__main__":
         
     # main_epoch = base_args.main_epoch
     # sub_epoch = base_args.sub_epoch
-    # main_epochs = [190]
-    main_epochs = [240, 300, 360]
+    main_epochs = [400]
     sub_epochs = [200]
-    # main_epochs = [600]
-    # sub_epochs = [400]
     for main_epoch in main_epochs:
         for sub_epoch in sub_epochs:
             # main_ckpt_path = os.path.join(base_args.model_root, 'main_uv', f'checkpoints/G_{main_epoch}.pth')
@@ -323,11 +298,5 @@ if __name__ == "__main__":
                                 torchaudio.save(os.path.join(sample_write_dir, f'{source_speaker}_synth.wav'), synth, 16000)
                     print(f"Epoch-M:{main_epoch},S:{sub_epoch}, Source Gender:{source_gender}, Target Gender:{target_gender}, Consistency:{np.round(np.mean(metric['consistency']), 5)}, Rnd_consistency:{np.round(np.mean(metric['rnd_consistency']), 5)} F0_deviation:{np.round(np.mean(metric['f0deviation']), 2)}")
             
-# CUDA_VISIBLE_DEVICES=5 python evaluation/main_eval.py --main_epoch=600 --sub_epoch=400 --target_gender='male' --batch_size=10
-# CUDA_VISIBLE_DEVICES=5 python evaluation/main_eval.py --main_epoch=0 --sub_epoch=200 --batch_size=25 --save_samples=1
-
-# CUDA_VISIBLE_DEVICES=5 python evaluation/main_eval.py --batch_size=25
-# CUDA_VISIBLE_DEVICES=11 python evaluation/main_eval.py --batch_size=25
-
 # CUDA_VISIBLE_DEVICES=0 python evaluation/main_eval.py --batch_size=1
 # CUDA_VISIBLE_DEVICES=5 python evaluation/main_eval.py --batch_size=1
