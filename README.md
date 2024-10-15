@@ -115,16 +115,6 @@ Then run `preprocessing/img_frontal.py`, it will copy only centured face images 
 python preprocessing/img_frontal.py --lrs3_root 'your-LRS3-original-root' --types pretrain trainval test
 ```
 
-# Inference
-For inference, first save the main model weights ('main.pth') and sub model weights ('sub.pth') in the 'pretrain' folder.\
-Next, save your source audio file ('source.wav') and target face image file ('target.jpg') in the 'inference' folder. Altenatively, you can use your own file paths by referring to the parser inside `inference.py` file. Then, run the code below.
-```
-CUDA_VISIBLE_DEVICES=0 python inference/inference.py
-```
-### Model weight
-For the pretrained model weights, please contact us bia email (jjlee0721@snu.ac.kr), including your affiliation and the purpose for using the model weights. Alternatively, you can train your own model using the training code provided below (the same code used to generate the pretrained model weights).\
-Our pretrained model was trained for 300 epochs for the main model and 200 epochs for the sub model.
-
 # Train
 For training, both the 'main' model (our primary voice conversion model) and the 'sub' model (Average F0 estimation network) need to be trained. For more details, please refer to our paper.\
 Make sure to update the data paths ('data.aud_dir' and 'data.img_dir') in the configuration files ('configs/main.json' and 'configs/sub.json').
@@ -138,6 +128,24 @@ python main.py --write_root='your-model-save-root' --model=main --gpus=1,2,3,4
 python main.py --write_root='your-model-save-root' --model=sub --gpus=3,4
 ```
 
+## Evaluation
+To evaluate your own model, we provide 'evaluation/sub_eval.py' for assessing the deviation of average F0 for the sub model, and 'evaluation/main_eval.py' for evaluating both objective consistency and average F0 for the main model. Be sure to update the dataset paths and specify the model weights paths.
+```
+CUDA_VISIBLE_DEVICES=0 python evaluation/main_eval.py --save_samples=1
+CUDA_VISIBLE_DEVICES=0 python evaluation/sub_eval.py
+```
+
+
 # Inference
+For inference, first save the main model weights ('main.pth') and sub model weights ('sub.pth') in the 'pretrain' folder.\
+Next, save your source audio file ('source.wav') and target face image file ('target.jpg') in the 'inference' folder. Altenatively, you can use your own file paths by referring to the parser inside `inference.py` file. Then, run the code below.
+```
+CUDA_VISIBLE_DEVICES=0 python inference/inference.py
+```
+### Model weight
+For the pretrained model weights, please contact us bia email (jjlee0721@snu.ac.kr), including your affiliation and the purpose for using the model weights. Alternatively, you can train your own model using the training code provided below (the same code used to generate the pretrained model weights).\
+Our pretrained model was trained for 300 epochs for the main model and 200 epochs for the sub model.
+
+
 
 
