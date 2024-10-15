@@ -9,7 +9,7 @@ And also, don't miss our [demo](https://jaejunl.github.io/HYFace_Demo/).
 
 # Intro
 This implementation is built upon a __so-vits-svc__ ([link](https://github.com/svc-develop-team/so-vits-svc)), a dedicated project for singing voice conversion. We highly recommend exploring their page for further explanations of the module we used, except for those related to face image processing.\
-For face image processing, we use a Vision Transformer (ViT) similar to the implementation of Face-Transformer ([Link](https://github.com/zhongyy/Face-Transformer/tree/main/copy-to-vit_pytorch-path)).
+For face image processing, we use a Vision Transformer (ViT) similar to the implementation of Face-Transformer ([link](https://github.com/zhongyy/Face-Transformer/tree/main/copy-to-vit_pytorch-path)).
 
 # Dataset
 We used LRS3 dataset ([arxiv](https://arxiv.org/abs/1809.00496), [website](https://mmai.io/datasets/lip_reading/)), consists of 5,502 videos from TED and TEDx.
@@ -144,8 +144,6 @@ CUDA_VISIBLE_DEVICES=0 python inference/inference.py
 ```
 ### Model weight
 For the pretrained model weights, please contact us bia email (jjlee0721@snu.ac.kr), including your affiliation and the purpose for using the model weights. Alternatively, you can train your own model using the training code provided below (the same code used to generate the pretrained model weights).\
-Our pretrained model was trained for 300 epochs for the main model and 200 epochs for the sub model.
-
-
+Our pretrained model was trained for 300 epochs for the main model and 100 epochs for the sub model.
 
 
