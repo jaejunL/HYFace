@@ -8,7 +8,7 @@ import torchaudio
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--lrs3_root', type=str, default='/disk2/LRS3/original', help='original LRS3 dataset root')
-parser.add_argument('--types', nargs='+', default='pretrain', help='pretrain / trainval / test')
+parser.add_argument('--types', nargs='+', default=['pretrain'], help='pretrain / trainval / test')
 args = parser.parse_args()
 
 types = args.types # 'pretrain', 'trainval', 'test'
@@ -25,8 +25,6 @@ for typ in types:
         os.makedirs(os.path.join(temp_root, typ, speaker), exist_ok=True)
         video_paths = glob.glob(os.path.join(lrs3_root, typ, speaker, '*.mp4'))
 
-        # if i > 2:
-            # break
         for video_path in video_paths:
             video_name = os.path.basename(video_path)
             wav_path = f"{temp_root}/{typ}/{speaker}/{video_name[:-4]}.wav"
@@ -80,4 +78,4 @@ for typ in types:
             vc.release()
 
 # python preprocessing/video_processing.py --lrs3_root '/disk2/LRS3/original' --types test trainval pretrain
-# python preprocessing/video_processing.py --lrs3_root '/disk2/LRS3/original' --types pretrain
+# python preprocessing/video_processing.py --lrs3_root '/disk2/LRS3/original' --types trainval

@@ -56,7 +56,6 @@ if __name__ == "__main__":
         net_sub = net_sub.to('cuda:0')
         net_sub.eval()    
         for target_gender in genders:
-            # dev_dict = {}
             deviations = []
             for i, (avgf0, face, img_dir) in enumerate(testset):
                 speaker = os.path.basename(os.path.dirname(os.path.dirname(img_dir)))

@@ -24,7 +24,7 @@ for typ in types:
     for i, speaker in enumerate(speakers):
         print(f'Types:{typ}, Speaker index:{i}/{len(speakers)}', end='\r')
         os.makedirs(os.path.join(temp_root, typ, speaker), exist_ok=True)
-        image_folders = [dat for dat in glob.glob(os.path.join(temp_root, typ, speaker, '*')) if '.wav' not in dat]
+        image_folders = [dat for dat in glob.glob(os.path.join(temp_root, typ, speaker, '*')) if '.wav' not in os.path.basename(dat)]
         
         # if i > 2:
             # break

@@ -233,10 +233,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     # set parameters
     parser.add_argument('--model_root', type=str, default="/disk3/jaejun/HYFace", help='your-HYFace-model-root')
-    parser.add_argument('--aud_root', type=str, default='/disk2/LRS3/modified/auds', help='your-LRS3-aud-root')
-    parser.add_argument('--img_root', type=str, default='/disk2/LRS3/modified_original/imgs', help='your-LRS3-img-root')
-    parser.add_argument('--main_epoch', type=str, default=400, help='your-main-model-epoch')
-    parser.add_argument('--sub_epoch', type=str, default=20, help='your-sub-model-epoch')
+    parser.add_argument('--aud_root', type=str, default='/disk2/LRS3/modified', help='your-LRS3-aud-root')
+    parser.add_argument('--img_root', type=str, default='/disk2/LRS3/modified', help='your-LRS3-img-root')
+    parser.add_argument('--main_epoch', type=str, default=300, help='your-main-model-epoch')
+    parser.add_argument('--sub_epoch', type=str, default=200, help='your-sub-model-epoch')
     parser.add_argument('--batch_size', type=int, default=1, help='batch size of test set Dataloader')
     parser.add_argument('--seed', type=int, default=1234, help='random seed')
     parser.add_argument('--save_samples', type=int, default=0)
@@ -260,11 +260,10 @@ if __name__ == "__main__":
         
     # main_epoch = base_args.main_epoch
     # sub_epoch = base_args.sub_epoch
-    main_epochs = [400]
+    main_epochs = [300]
     sub_epochs = [200]
     for main_epoch in main_epochs:
         for sub_epoch in sub_epochs:
-            # main_ckpt_path = os.path.join(base_args.model_root, 'main_uv', f'checkpoints/G_{main_epoch}.pth')
             main_ckpt_path = os.path.join(base_args.model_root, 'main', f'checkpoints/G_{main_epoch}.pth')
             sub_ckpt_path = os.path.join(base_args.model_root, 'sub', f'checkpoints/G_{sub_epoch}.pth')
             if base_args.save_samples:

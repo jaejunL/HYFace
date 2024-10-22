@@ -29,9 +29,9 @@ if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join([str(gpu_num) for gpu_num in base_args.gpus])
     os.environ['MASTER_ADDR'] = "127.0.0.1"
     os.environ['MASTER_PORT'] = base_args.port
-    if base_args.test == True:
-        os.environ['WANDB_MODE'] = "dryrun"
-    os.environ['WANDB_RUN_ID'] = f'HYFace_{base_args.model}_{base_args.model}'
+    # if base_args.test == True:
+        # os.environ['WANDB_MODE'] = "dryrun"
+    # os.environ['WANDB_RUN_ID'] = f'HYFace_{base_args.model}'
 
     base_args.base_dir = os.path.join(base_args.write_root, base_args.model)
     os.makedirs(os.path.join(base_args.base_dir, 'checkpoints'), exist_ok=True)
@@ -44,7 +44,6 @@ if __name__ == "__main__":
     args.base_args = base_args
 
     train(args)
-
 
 # python main.py --write_root=/disk3/jaejun/HYFace --model=main --gpus=1,2,3,4 --port=0104 --test=1
 # python main.py --write_root=/disk3/jaejun/HYFace --model=sub --gpus=10,11 --port=1011 --test=1

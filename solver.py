@@ -1,6 +1,6 @@
 import os
 import time
-import wandb
+# import wandb
 
 import numpy as np
 from time import gmtime, strftime
@@ -26,7 +26,7 @@ from modules.mel_processing import mel_spectrogram_torch, spec_to_mel_torch
 class Solver_Main(object):
     def __init__(self, args):
         self.args = args
-        self.wandb = wandb.init(entity='jjlee0721', project='HYFace', group=args.base_args.model, config=args)
+        # self.wandb = wandb.init(entity='Your-WanDB-ID', project='Your-WanDB-ProjectName', group=args.base_args.model, config=args)
         self.global_step = 0
     
     def build_dataset(self, args):
@@ -92,8 +92,8 @@ class Solver_Main(object):
                 if self.global_step % args.train.log_interval == 0:
                     print("\r[Epoch:{:3d}, {:.0f}%, Step:{}] [Loss G:{:.5f}] [{}]"
                         .format(epoch, 100.*batch_idx/self.max_iter, self.global_step, losses['gen/total'], strftime('%Y-%m-%d %H:%M:%S', gmtime())))
-                    if args.base_args.test != 1:
-                        self.wandb_log(losses, epoch, "train")
+                    # if args.base_args.test != 1:
+                        # self.wandb_log(losses, epoch, "train")
             if args.base_args.test:
                 if batch_idx > 100:
                     break
@@ -111,8 +111,8 @@ class Solver_Main(object):
                 # validation log
                 if args.base_args.rank % args.base_args.ngpus_per_node == 0:
                     print("\r[Validation Epoch:{:3d}] [Loss G:{:.5f}]".format(epoch, losses['gen/total']))
-                    if args.base_args.test != 1:
-                        self.wandb_log(losses, epoch, "valid")
+                    # if args.base_args.test != 1:
+                        # self.wandb_log(losses, epoch, "valid")
                         
     def loss_generator(self, args, items, phase="train") -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
         c, f0, spec, y, uv, avgf0, face, lengths = items
@@ -203,27 +203,27 @@ class Solver_Main(object):
                      
         return losses, media
                 
-    def wandb_log(self, loss_dict, epoch, phase="train"):
-        wandb_dict = {}
-        wandb_dict.update(loss_dict)
-        wandb_dict.update({"epoch":epoch})
-        if phase == "train":
-            wandb_dict.update({"global_step": self.global_step})
-            with torch.no_grad():
-                grad_norm = np.mean([
-                    torch.norm(p.grad).item() for p in self.net['g'].parameters() if p.grad is not None])
-                param_norm = np.mean([
-                    torch.norm(p).item() for p in self.net['g'].parameters() if p.dtype == torch.float32])
-            wandb_dict.update({ "common/grad-norm":grad_norm, "common/param-norm":param_norm})
-            wandb_dict.update({ "common/learning-rate-g":self.optim['g'].param_groups[0]['lr']})
-        elif phase == "valid":
-            wandb_dict = dict(('valid/'+ key, np.mean(value)) for (key, value) in wandb_dict.items())
-        self.wandb.log(wandb_dict)
+    # def wandb_log(self, loss_dict, epoch, phase="train"):
+    #     wandb_dict = {}
+    #     wandb_dict.update(loss_dict)
+    #     wandb_dict.update({"epoch":epoch})
+    #     if phase == "train":
+    #         wandb_dict.update({"global_step": self.global_step})
+    #         with torch.no_grad():
+    #             grad_norm = np.mean([
+    #                 torch.norm(p.grad).item() for p in self.net['g'].parameters() if p.grad is not None])
+    #             param_norm = np.mean([
+    #                 torch.norm(p).item() for p in self.net['g'].parameters() if p.dtype == torch.float32])
+    #         wandb_dict.update({ "common/grad-norm":grad_norm, "common/param-norm":param_norm})
+    #         wandb_dict.update({ "common/learning-rate-g":self.optim['g'].param_groups[0]['lr']})
+    #     elif phase == "valid":
+    #         wandb_dict = dict(('valid/'+ key, np.mean(value)) for (key, value) in wandb_dict.items())
+    #     self.wandb.log(wandb_dict)
         
 class Solver_Sub(object):
     def __init__(self, args):
         self.args = args
-        self.wandb = wandb.init(entity='jjlee0721', project='f0ce', group=args.base_args.exp_name, config=args)
+        # self.wandb = wandb.init(entity='Your-WanDB-ID', project='Your-WanDB-ProjectName', group=args.base_args.model, config=args)
         self.global_step = 0
     
     def build_dataset(self, args):
@@ -274,8 +274,8 @@ class Solver_Sub(object):
                 if self.global_step % args.train.log_interval == 0:
                     print("\r[Epoch:{:3d}, {:.0f}%, Step:{}] [Loss G:{:.5f}] [{}]"
                         .format(epoch, 100.*batch_idx/self.max_iter, self.global_step, losses['gen/total'], strftime('%Y-%m-%d %H:%M:%S', gmtime())))
-                    if args.base_args.test != 1:
-                        self.wandb_log(losses, epoch, "train")
+                    # if args.base_args.test != 1:
+                        # self.wandb_log(losses, epoch, "train")
             if args.base_args.test:
                 if batch_idx > 100:
                     break
@@ -292,8 +292,8 @@ class Solver_Sub(object):
                 # validation log
                 if args.base_args.rank % args.base_args.ngpus_per_node == 0:
                     print("\r[Validation Epoch:{:3d}] [Loss G:{:.5f}]".format(epoch, losses['gen/total']))
-                    if args.base_args.test != 1:
-                        self.wandb_log(losses, epoch, "valid")
+                    # if args.base_args.test != 1:
+                        # self.wandb_log(losses, epoch, "valid")
                         
     def loss_generator(self, args, items, phase="train") -> Tuple[torch.Tensor, Dict[str, torch.Tensor]]:
         avgf0, face, _ = items
@@ -314,20 +314,20 @@ class Solver_Sub(object):
                   'gen/total': total_loss.item()}                
         return losses
                 
-    def wandb_log(self, loss_dict, epoch, phase="train"):
-        wandb_dict = {}
-        wandb_dict.update(loss_dict)
-        wandb_dict.update({"epoch":epoch})
-        if phase == "train":
-            wandb_dict.update({"global_step": self.global_step})
-            with torch.no_grad():
-                grad_norm = np.mean([
-                    torch.norm(p.grad).item() for p in self.net['g'].parameters() if p.grad is not None])
-                param_norm = np.mean([
-                    torch.norm(p).item() for p in self.net['g'].parameters() if p.dtype == torch.float32])
-            wandb_dict.update({ "common/grad-norm":grad_norm, "common/param-norm":param_norm})
-            wandb_dict.update({ "common/learning-rate-g":self.optim['g'].param_groups[0]['lr']})
-        elif phase == "valid":
-            wandb_dict = dict(('valid/'+ key, np.mean(value)) for (key, value) in wandb_dict.items())
-        self.wandb.log(wandb_dict)
+    # def wandb_log(self, loss_dict, epoch, phase="train"):
+    #     wandb_dict = {}
+    #     wandb_dict.update(loss_dict)
+    #     wandb_dict.update({"epoch":epoch})
+    #     if phase == "train":
+    #         wandb_dict.update({"global_step": self.global_step})
+    #         with torch.no_grad():
+    #             grad_norm = np.mean([
+    #                 torch.norm(p.grad).item() for p in self.net['g'].parameters() if p.grad is not None])
+    #             param_norm = np.mean([
+    #                 torch.norm(p).item() for p in self.net['g'].parameters() if p.dtype == torch.float32])
+    #         wandb_dict.update({ "common/grad-norm":grad_norm, "common/param-norm":param_norm})
+    #         wandb_dict.update({ "common/learning-rate-g":self.optim['g'].param_groups[0]['lr']})
+    #     elif phase == "valid":
+    #         wandb_dict = dict(('valid/'+ key, np.mean(value)) for (key, value) in wandb_dict.items())
+    #     self.wandb.log(wandb_dict)
 

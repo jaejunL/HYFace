@@ -315,7 +315,7 @@ class SynthesizerTrn(nn.Module):
         o = self.dec(z * c_mask, g=g, f0=f0)
         return o, f0
 
-
+    
 class DiscriminatorP(torch.nn.Module):
     def __init__(self, period, kernel_size=5, stride=3, use_spectral_norm=False):
         super(DiscriminatorP, self).__init__()
