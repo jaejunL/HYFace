@@ -3,7 +3,7 @@ This repository contains the official implementation of our paper
 ([link](https://www.isca-archive.org/interspeech_2024/lee24d_interspeech.html),
 [arxiv](https://www.arxiv.org/abs/2408.09802)), _Hear Your Face: Face-based voice conversion with F0 estimation_, published at Interspeech 2024.
 
-> **Note**: The code was released now on 24.10.22 (v1.0)! If you have any questions or encounter any issues while running the code, fell free to contact us.
+> **Note**: The code was released now on 24.10.22 (v1.0)! If you have any questions or encounter any issues while running the code, feel free to contact us.
 
 And also, don't miss our [demo](https://jaejunl.github.io/HYFace_Demo/).
 
