@@ -1,6 +1,6 @@
 import os
 import time
-import wandb
+# import wandb
 
 import torch
 import torch.multiprocessing as mp
@@ -10,8 +10,8 @@ from solver import Solver_Main, Solver_Sub
 import utils
 
 def train(args, run=None):
-    wandb.require(experiment="service")
-    wandb.setup()
+    # wandb.require(experiment="service")
+    # wandb.setup()
     
     ngpus_per_node = int(torch.cuda.device_count()/args.base_args.n_nodes)
     print("use {} gpu mac hine".format(ngpus_per_node))
